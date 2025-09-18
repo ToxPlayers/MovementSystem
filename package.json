@@ -6,7 +6,6 @@
   "unity": "6000.0",
   "author": "Tox (https://github.com/ToxPlayers/MovementSystem)",
   "homepage": "https://github.com/ToxPlayers/MovementSystem",
-  "dependencies": { 
-  "https://github.com/ToxPlayers/MovementSystem" : "1.0.0"
+  "dependencies": {  
   }
 }
