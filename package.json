@@ -1,0 +1,12 @@
+{
+  "name": "com.tox.movementsystem",
+  "displayName": "Tox Movement System",
+  "description": "Dynamic Movement System for Unity",
+  "version": "1.0.0",
+  "unity": "6000.0",
+  "author": "Tox (https://github.com/ToxPlayers/MovementSystem)",
+  "homepage": "https://github.com/ToxPlayers/MovementSystem",
+  "dependencies": { 
+  "https://github.com/ToxPlayers/MovementSystem" : "1.0.0"
+  }
+}
