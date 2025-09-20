@@ -7,32 +7,34 @@ namespace MovementSys
 {
     public class JumpMovement : MovementBase, GroundedCaster.IDisableGrounded
     {
-        [Range(0f, 1f)] public float JumpForwardAngle, RunJumpAngle;
+        [Range(0f, 1f)] public float JumpForwardAngle = 1f, RunJumpAngle = 0.5f;
         public float JumpForce = 3f;
-        [SerializeField] RealTimer _jumpInputForgiveTimer, _jumpDisableGroundedTimer;
-        Vector3 _jumpDir;
-
-        private void OnValidate()
+        [SerializeField] float _jumpInputForgiveGroundedTime = 0.08f;
+        [SerializeField]
+        DurationTimer _jumpDisableGroundedTimer = new()
         {
-        }
+            StopOnTimerOver = true,
+            MaxTime = 0.1f
+        };
+        Vector3 _jumpDir; 
 
         private void OnEnable()
         {
-            _jumpDisableGroundedTimer.ForceTimerOver();
+            _jumpDisableGroundedTimer.StopOnTimerOver = true;
         }
 
-        public bool GetIsGroundedDisabled() => ! _jumpDisableGroundedTimer.TimerOver;
+        public bool GetIsGroundedDisabled() => ! _jumpDisableGroundedTimer.IsTimerOver;
 
         private void Update()
-        {
+        { 
             var jumpInput = Input.GetYInput() > 0;
-            var mov = Input.GetLocalMoveDirXZ();
-            var hasMoveInput = !mov.IsZero();
-
             if (!jumpInput)
                 return;
 
-            if (IsGrounded || ! _jumpInputForgiveTimer.TimerOver)
+            var mov = Input.GetLocalMoveDirXZ();
+            var hasMoveInput = !mov.IsZero();
+            if (IsGrounded && Grounded.GroundedChangeTime > _jumpInputForgiveGroundedTime
+                && _jumpDisableGroundedTimer.IsTimerOver)
             {
                 _jumpDisableGroundedTimer.Restart();
                     
@@ -46,9 +48,8 @@ namespace MovementSys
 
                 Push(_jumpDir * JumpForce);
             }
-            else 
-                _jumpInputForgiveTimer.Restart();
-             
+            else
+                _jumpDisableGroundedTimer.Stop();
         }
 
     }

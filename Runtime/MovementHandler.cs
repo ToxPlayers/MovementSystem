@@ -16,11 +16,7 @@ namespace MovementSys
         [field: SerializeField, GetChild, Required] public GroundedCaster Grounded { get; private set; }
         [field: SerializeField, Get, Required] public Rigidbody Rb { get; private set; } 
         [field: SerializeField, Get, PropertyOrder(-10), Required] public MovementInputBase Input { get; private set; } 
-
-        protected virtual void OnValidate()
-        { 
-            Rb.useGravity = false;
-        }
+         
         protected virtual void Awake()
         {
             Rb.maxLinearVelocity = MaxPossibleVelocity; 

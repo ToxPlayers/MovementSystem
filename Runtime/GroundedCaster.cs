@@ -27,11 +27,11 @@ namespace MovementSys
         public RaycastHit GroundedRayHit => _groundedRayHit;
         [SerializeField, Get] CapsuleCollider _capsule;
         [SerializeField] float _sphereCastDistance = 0.3f, _downOffset = -0.02f;
-        public float GroundedChangeTime => _groundedTimer.TimeRunning;
+        public float GroundedChangeTime => _groundedTimer.TimeTicked;
         [ShowInInspector, PropertyOrder(98)] public bool IsGrounded => _groundedTimer.State;
         
 
-        readonly List<IDisableGrounded> _disablesGrounded = new();
+        [ShowInInspector, ReadOnly] readonly List<IDisableGrounded> _disablesGrounded = new();
 
         public void DisableGrounded(IDisableGrounded source) 
         {  
@@ -46,7 +46,7 @@ namespace MovementSys
         private void Awake()
         {
             Update();
-            _groundedTimer.SetIsTimerRunning(true);
+            _groundedTimer.Restart();
         }
          
         bool IsGroundedForceDisabledBySources()
@@ -134,6 +134,11 @@ namespace MovementSys
             castPos.y += _sphereCastDistance;
             castPos += Vector3.up * _capsule.radius;
             return castPos;
+        }
+
+        private void OnDisable()
+        {
+            _groundedTimer.Dispose();
         }
 
 #if UNITY_EDITOR  
