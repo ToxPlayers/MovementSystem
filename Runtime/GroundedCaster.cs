@@ -9,6 +9,7 @@ using HideInEdit = TriInspector.HideInEditModeAttribute;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using ScaledTimers;
 
 namespace MovementSys
 {
@@ -16,58 +17,63 @@ namespace MovementSys
     [ExecuteInEditMode]
     public class GroundedCaster : MonoBehaviour
 	{
+        public interface IDisableGrounded { public bool GetIsGroundedDisabled(); }
         public LayerMask GroundLayer;
         static Ray _rayDown = new Ray(Vector3.zero, Vector3.down);
         static Ray _rayUp = new Ray(Vector3.zero, Vector3.up);
 
-        [ShowInInspector, ReadOnly, PropertyOrder(99)] GameBoolTimer _groundedTimer;
+        [ShowInInspector, ReadOnly, PropertyOrder(99)] readonly StateTimer _groundedTimer = new();
         RaycastHit _groundedRayHit;
         public RaycastHit GroundedRayHit => _groundedRayHit;
         [SerializeField, Get] CapsuleCollider _capsule;
         [SerializeField] float _sphereCastDistance = 0.3f, _downOffset = -0.02f;
         public float GroundedChangeTime => _groundedTimer.TimeRunning;
-        [ShowInInspector, PropertyOrder(98)] public bool IsGrounded => _groundedTimer.Value;
-         
-        readonly List<Ref<GameTimer>> _disablesGrounded = new();
+        [ShowInInspector, PropertyOrder(98)] public bool IsGrounded => _groundedTimer.State;
+        
 
-        public void DisableGrounded(Ref<GameTimer> timer) 
-        {
-            if(!timer.Value.TimerOver)
-                _disablesGrounded.Add(timer);
+        readonly List<IDisableGrounded> _disablesGrounded = new();
+
+        public void DisableGrounded(IDisableGrounded source) 
+        {  
+            _disablesGrounded.Add(source);
         }
 
         private void OnValidate()
         {
             if(!_capsule) _capsule = GetComponent<CapsuleCollider>();
-            _groundedTimer.Timer.timerType =  GameTimer.TimerType.Scaled;
         }
 
         private void Awake()
         {
             Update();
+            _groundedTimer.SetIsTimerRunning(true);
         }
          
-        private void Update()
+        bool IsGroundedForceDisabledBySources()
         {
             for (int i = 0; i < _disablesGrounded.Count; i++)
             {
-                var isNull = _disablesGrounded[i] == null;
-                if (isNull || _disablesGrounded[i].Value.TimerOver)
+                if (_disablesGrounded[i] == null)
                 {
-                    if (isNull && !Application.isPlaying)
-                        continue;
-
                     _disablesGrounded.RemoveAt(i);
-                    i--; 
+                    i--;
                 }
+                else if (_disablesGrounded[i].GetIsGroundedDisabled())
+                    return true;
             }
+            return false;
+        }
+
+        private void Update()
+        { 
             UpdateGrounded();
         }
          
         public bool UpdateGrounded()
         {
             var groundCast = GetGroundCast(out _groundedRayHit);
-            return _groundedTimer.Value = _disablesGrounded.Count == 0 && groundCast;
+            var isDisabled = IsGroundedForceDisabledBySources(); 
+            return _groundedTimer.State = !isDisabled && (_disablesGrounded.Count == 0 && groundCast);
         }
 
         bool GetGroundCast(out RaycastHit hit)
