@@ -9,7 +9,7 @@ using HideInEdit = TriInspector.HideInEditModeAttribute;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
-using ScaledTimers;
+using TickTimers;
 
 namespace MovementSys
 {

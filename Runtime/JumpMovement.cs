@@ -1,4 +1,4 @@
-﻿using ScaledTimers;
+﻿using TickTimers;
 using Sirenix.OdinInspector;
 using System;
 using System.Diagnostics;
