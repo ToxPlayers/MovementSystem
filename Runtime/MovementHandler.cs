@@ -12,7 +12,7 @@ namespace MovementSys
         protected const float MaxPossibleVelocity = 1000; 
         [ShowInInspector, HideInEditorMode] public Vector3 VelocityResult => Rb ? Rb.linearVelocity : Vector3.zero;
         [ShowInInspector, HideInEditorMode] public float VelocitySpeed => VelocityResult.magnitude;
-        [SerializeReference] StatValue SpeedMultiplier = new StatValue(1f);
+        [field: SerializeReference] public StatValue SpeedMultiplier { get; private set; } = new StatValue(1f);
         [field: SerializeField, GetChild, Required] public GroundedCaster Grounded { get; private set; }
         [field: SerializeField, Get, Required] public Rigidbody Rb { get; private set; } 
         [field: SerializeField, Get, PropertyOrder(-10), Required] public MovementInputBase Input { get; private set; } 
