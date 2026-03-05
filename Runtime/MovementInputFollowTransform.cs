@@ -1,25 +1,25 @@
 ﻿#if UNITY_EDITOR  
 #endif
-using UnityEngine; 
+using UnityEngine;
+using UnityEngine.InputSystem;
 namespace MovementSys
 {
-    public class MovementInputFollowTransform :  MovementInputBase
+    [System.Serializable]
+    public class MovementInputFollowTransform :  IMovementInput
     {
+        public Transform From;
         public Transform Target;
-        public override bool IsSprint() => false;
-        public override bool IsDash() => false;
-        public override Vector2 GetLocalMoveDirXZ()
-        {
-            if(Target)
-                return transform.InverseTransformDirection(transform.DirectionTo(Target.position)).XZ();
-            return Vector2.zero;
+
+        public Vector2 GetLocalMoveDirXZ() {
+            return (From.position - Target.position).XZ().normalized;
         }
-        public override bool IsBrake() => false;
-        public override float GetYInput()
-        {
-            if (Target)
-                return transform.PosY() - Target.PosY();
-            return 0f;
-        }
+
+        public float GetYInput() => (From.position - Target.position).y;
+
+        public bool IsBrake() => false;
+
+        public bool IsDodge() => false;
+
+        public bool IsSprint() => false;
     }
 }

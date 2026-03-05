@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+
 namespace MovementSys
 {
     public abstract class MovementBase : MonoBehaviour
@@ -8,7 +9,8 @@ namespace MovementSys
         public bool IsSetup => ! Handler;
         public GroundedCaster Grounded => Handler.Grounded;
         public bool IsGrounded => Grounded.IsGrounded;
-        public MovementInputBase Input => Handler.Input;
+        public float HandlerSpeedMult => Handler.SpeedMultiplier;
+        public IMovementInput Input => Handler.Input;
         public Rigidbody Rb => Handler.Rb;
         public Transform Tf => Handler.Rb.transform;
         public Vector3 MoveRawInput => Handler.MoveRawInput;

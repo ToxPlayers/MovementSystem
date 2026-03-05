@@ -71,14 +71,25 @@ namespace MovementSys
          
         public bool UpdateGrounded()
         {
+            if (!_capsule)
+                return false;
             var groundCast = GetGroundCast(out _groundedRayHit);
             var isDisabled = IsGroundedForceDisabledBySources(); 
             return _groundedTimer.State = !isDisabled && (_disablesGrounded.Count == 0 && groundCast);
         }
 
+        public float GetSlopeAngle() => Vector3.Angle(Vector3.up, _groundedRayHit.normal); 
+
+        public Vector3 AlignWithSlope(in Vector3 dir)
+        {
+            if (!IsGrounded)
+                return dir;
+            return Vector3.ProjectOnPlane(dir, _groundedRayHit.normal);
+        }
+
         bool GetGroundCast(out RaycastHit hit)
         {
-            var castPos = GetCastPosition();
+            var castPos = GetCastOrigin();
             _rayDown.origin = castPos;
             if (Physics.Raycast(_rayDown, out hit, _sphereCastDistance, GroundLayer)) 
                 return true; 
@@ -103,15 +114,18 @@ namespace MovementSys
             outPos = pos;
             return false;
         }
+
+        public Vector3 FeetPosition { get => transform.position; set => transform.position = value; }
+
         public void FixUnderMap()
         {
             var minPos = _capsule.bounds.min;
-            if (FixUnderMapPos(transform.position, out Vector3 fixedpos, GroundLayer))
+            if (FixUnderMapPos(FeetPosition, out Vector3 fixedpos, GroundLayer))
             {
                 var offset = minPos.y - fixedpos.y;
-                var pos = transform.position;
+                var pos = FeetPosition;
                 pos.y += offset;
-                transform.position = pos;
+                FeetPosition = pos;
             }
         }
         static public bool HasGroundBelow(Vector3 pos, LayerMask groundLayer)
@@ -125,7 +139,7 @@ namespace MovementSys
             return Physics.Raycast(_rayUp, out hit, Mathf.Infinity, groundLayer);
         }
 
-        Vector3 GetCastPosition()
+        public Vector3 GetCastOrigin()
         {
             var castPos = _capsule.bounds.min;
             castPos.x += _capsule.bounds.extents.x;
@@ -138,8 +152,14 @@ namespace MovementSys
 
         private void OnDisable()
         {
-            _groundedTimer.Dispose();
+            _groundedTimer.SetIsTicking(false);
         }
+
+        private void OnDestroy()
+        {
+            _groundedTimer.Dispose(); 
+        }
+
 
 #if UNITY_EDITOR  
         private void OnDrawGizmos()
@@ -149,7 +169,7 @@ namespace MovementSys
 
             Gizmos.color = IsGrounded ? Color.magenta : Color.red;
 
-            var castPos = GetCastPosition();
+            var castPos = GetCastOrigin();
             Gizmos.DrawWireSphere(castPos, _capsule.radius);
             var desiredGroundPos = castPos + Vector3.down * _sphereCastDistance;
             Gizmos.DrawWireSphere(desiredGroundPos, _capsule.radius);

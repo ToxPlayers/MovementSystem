@@ -13,14 +13,14 @@ namespace MovementSys
         [SerializeField]
         DurationTimer _jumpDisableGroundedTimer = new()
         {
-            StopOnTimerOver = true,
+            StopTickingOnTimerOver = true,
             MaxTime = 0.1f
         };
         Vector3 _jumpDir; 
 
         private void OnEnable()
         {
-            _jumpDisableGroundedTimer.StopOnTimerOver = true;
+            _jumpDisableGroundedTimer.StopTickingOnTimerOver = true;
         }
 
         public bool GetIsGroundedDisabled() => ! _jumpDisableGroundedTimer.IsTimerOver;
@@ -49,7 +49,12 @@ namespace MovementSys
                 Push(_jumpDir * JumpForce);
             }
             else
-                _jumpDisableGroundedTimer.Stop();
+                _jumpDisableGroundedTimer.StopAndDeregister();
+        }
+
+        private void OnDisable()
+        {
+            _jumpDisableGroundedTimer.Dispose();
         }
 
     }

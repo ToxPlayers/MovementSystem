@@ -2,6 +2,7 @@
 using System;
 using System.Collections; 
 using System.Collections.Generic;
+using TNRD;
 using UnityEngine;
 using UnityEngine.Windows;
 namespace MovementSys
@@ -14,15 +15,18 @@ namespace MovementSys
         [ShowInInspector, HideInEditorMode] public float VelocitySpeed => VelocityResult.magnitude;
         [field: SerializeReference] public StatValue SpeedMultiplier { get; private set; } = new StatValue(1f);
         [field: SerializeField, GetChild, Required] public GroundedCaster Grounded { get; private set; }
-        [field: SerializeField, Get, Required] public Rigidbody Rb { get; private set; } 
-        [field: SerializeField, Get, PropertyOrder(-10), Required] public MovementInputBase Input { get; private set; } 
-         
+        [field: SerializeField, Get, Required] public Rigidbody Rb { get; private set; }
+        [SerializeField, PropertyOrder(-10), Required] SerializableInterface<IMovementInput> _input;
+        public IMovementInput Input { get => _input.Value; private set => _input.Value = value; }
+        private void OnValidate() {
+            Input ??= GetComponent<IMovementInput>();
+        }
         protected virtual void Awake()
         {
             Rb.maxLinearVelocity = MaxPossibleVelocity; 
         }
 
-        [SerializeField] float _groundedDamping;
+        [SerializeField] float _groundedDamping = 5f;
         public bool IsOnSlope { get; private set; }
         public float SlopeAngle { get; private set; }
         [SerializeField] float _maxSlopeAngle = 40f;
